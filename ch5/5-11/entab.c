@@ -1,11 +1,9 @@
 #include <stdio.h>
-#include <stdlib.h>
+#include "tabs.h"
 
 #define MAXLINE 1000 /* maximum input line length */
-#define TAB_WIDTH 4
 
 void entab(char *tabs);
-int is_tab_stop(int pos, char *tabs);
 
 /*
     replace strings of blanks in input by minimum number of tabs and blanks to
@@ -21,37 +19,7 @@ int is_tab_stop(int pos, char *tabs);
 int main(int argc, char *argv[])
 {
     char tabs[MAXLINE + 1];
-
-    /* no tab stops provided -> use default */
-    if (argc <= 1)
-    {
-        for (int i = 1; i < MAXLINE; i++)
-        {
-            tabs[i] = i % TAB_WIDTH == 0;
-        }
-    }
-    else
-    {
-        /* use tab stops provided by user */
-        for (int i = 1; i < MAXLINE; i++)
-        {
-            tabs[i] = 0;
-        }
-        while (--argc > 0)
-        {
-            int tab_stop = atoi(*++argv);
-            if (tab_stop > 0 && tab_stop <= MAXLINE)
-            {
-                tabs[tab_stop] = 1;
-            }
-            else
-            {
-                printf("error: expected tab stop in range 0 %d, go %d\n", MAXLINE, tab_stop);
-                return 1;
-            }
-        }
-    }
-
+    init_tabs(argc, argv, tabs);
     entab(tabs);
     return 0;
 }
@@ -114,9 +82,4 @@ void entab(char *tabs)
             }
         }
     }
-}
-
-int is_tab_stop(int pos, char *tabs)
-{
-    return tabs[pos] || pos >= MAXLINE;
 }
