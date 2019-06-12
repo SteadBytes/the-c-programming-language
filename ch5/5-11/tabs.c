@@ -8,7 +8,7 @@
     init_tabs: set tab stop positions in array tabs using user provided
     args or according to default TAB_WIDTH if not specified
 */
-int init_tabs(int argc, char *argv[], char *tabs)
+void init_tabs(int argc, char *argv[], char *tabs)
 {
     /* no tab stops provided -> use default */
     if (argc <= 1)
@@ -34,7 +34,7 @@ int init_tabs(int argc, char *argv[], char *tabs)
             }
             else
             {
-                printf("error: expected tab stop in range 0 %d, go %d\n", MAXLINE, tab_stop);
+                printf("error: expected tab stop in range 0 %d, got %d\n", MAXLINE, tab_stop);
             }
         }
     }
