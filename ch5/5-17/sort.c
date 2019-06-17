@@ -17,6 +17,8 @@ int str_cmp(const char *s1, const char *s2);
 int ctoi(const char s);
 const char *substr(const char *s, int i, int j);
 
+void err_exit(char *msg, int status);
+
 /* option flags */
 int reverse = 0, numeric = 0, fold = 0, directory = 0;
 int start = 0, end = 0;
@@ -32,6 +34,7 @@ int start = 0, end = 0;
         end position defaults to end of line, else specify with j.
         i.e. sort -k3 -> sort based on field between position 3 and end of line
              sort -k3.6 -> sort based on field from position 3 to position 6
+        First character in line = position 1
 */
 int main(int argc, char *argv[])
 {
@@ -56,43 +59,42 @@ int main(int argc, char *argv[])
                 directory = 1;
                 break;
             case 'k': /* ex 5-17 */
+                /* TODO: split string on '.' and use atoi on each part? */
                 ++argv[0];
                 for (; isdigit(*argv[0]); ++argv[0])
                 {
-                    start = 10 * start + (*argv[0] - '0');
+                    start = 10 * start + ctoi(*argv[0]);
                 }
-                if (start < 0)
+                if (start <= 0)
                 {
-                    puts("error: -ki[.j] expected i > 0");
-                    return 1;
+                    err_exit("sort: -ki[.j] expected i > 0\n", 1);
                 }
                 if (*argv[0] == '.')
                 {
                     ++argv[0];
                     for (; isdigit(*argv[0]); ++argv[0])
                     {
-                        end = 10 * end + (*argv[0] - '0');
+                        end = 10 * end + ctoi(*argv[0]);
                     }
                     if (end < 0)
                     {
-                        puts("error: -ki[.j] expected j > 0");
-                        return 1;
+                        err_exit("sort: -ki[.j] expected j > 0\n", 1);
                     }
                 }
                 if (end && start > end)
                 {
-                    puts("error: -ki[.j] expected j > i");
-                    return 1;
+                    err_exit("sort: -ki[.j] expected j > i\n", 1);
                 }
                 move_to_next_arg = 1;
                 break;
-            default:
-                printf("error: invalid option: %c\n", c);
-                return 1;
+            default:;
+                char msg[80];
+                sprintf(msg, "sort: invalid option: %c\n", c);
+                err_exit(msg, 1);
             }
             /*
                 TODO: Find a better way to handle this
-                issue comes from -k option being multiple chars, where others are single char
+                -k option is multiple chars, where others are single char
              */
             if (move_to_next_arg)
             {
@@ -111,8 +113,9 @@ int main(int argc, char *argv[])
     }
     else
     {
-        printf("input too large to sort, max lines = %d\n", MAXLINES);
-        return 1;
+        char msg[80];
+        sprintf(msg, "sort: input too large, max lines = %d\n", MAXLINES);
+        err_exit(msg, 1);
     }
 }
 
@@ -155,14 +158,13 @@ const char *substr(const char *s, int i, int j)
     }
     if (i > strlen(s))
     {
-        /*TODO: error + exit instead of just print */
-        puts("error: string too short");
+        err_exit("sort: string too short\n", 1);
     }
     int len = j - i;
     char *subs = malloc(len);
     if (!subs)
     {
-        puts("error: unable to allocate memory");
+        err_exit("sort: unable to allocate memory\n", 1);
     }
     memcpy(subs, s + i, len);
     subs[j - i] = '\0';
@@ -305,4 +307,11 @@ void writelines(char *lineptr[], int nlines, int reverse)
             puts(lineptr[i]);
         }
     }
+}
+
+/* err_exit: exit program with status, output msg to stderr */
+void err_exit(char *msg, int status)
+{
+    fputs(msg, stderr);
+    exit(status);
 }
