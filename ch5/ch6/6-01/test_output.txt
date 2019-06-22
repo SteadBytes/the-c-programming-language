@@ -1,0 +1,10 @@
+#include
+"myheaders.h"
+int
+foo
+;
+
+int
+foo_bar
+;
+

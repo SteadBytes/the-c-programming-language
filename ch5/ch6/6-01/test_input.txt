@@ -1,0 +1,4 @@
+#include "myheaders.h"
+
+int foo; /* this is a foo */
+int foo_bar; /* this is a foo_bar */
